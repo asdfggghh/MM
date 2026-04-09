@@ -1,0 +1,216 @@
+/* ============================================================
+   SANJEEVANI — IoT Command Center (Simulation)
+   ============================================================ */
+
+.iot-panel {
+  margin-top: 32px;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.iot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.iot-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iot-status-chip {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(34,197,94,0.1);
+  color: var(--accent-green);
+  border: 1px solid rgba(34,197,94,0.3);
+}
+
+.iot-status-chip.critical {
+  background: rgba(239,68,68,0.1);
+  color: var(--accent-red);
+  border: 1px solid rgba(239,68,68,0.3);
+  animation: pulse-border 1.5s infinite;
+}
+
+/* ---- Sensor Grid ---- */
+.iot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 24px;
+}
+
+.sensor-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: center;
+}
+
+.sensor-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 15px;
+  display: block;
+}
+
+/* ---- G-Force Gauge ---- */
+.gauge-container {
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.gauge-unit { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ---- Tilt Visualizer ---- */
+.tilt-vis {
+  width: 80px; height: 80px;
+  border: 2px solid var(--border-subtle);
+  border-radius: 50%;
+  margin: 0 auto;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.tilt-line {
+  width: 60px; height: 3px;
+  background: var(--accent-blue);
+  border-radius: 50px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tilt-angle { margin-top: 15px; font-weight: 700; font-family: 'Rajdhani'; font-size: 1.4rem; }
+
+/* ---- Connectivity Radar ---- */
+.radar-vis {
+  width: 120px; height: 120px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.radar-circle {
+  border: 1px solid var(--accent-blue-dim);
+  border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  animation: radar-ping 3s linear infinite;
+}
+.radar-circle:nth-child(2) { animation-delay: 1s; }
+.radar-circle:nth-child(3) { animation-delay: 2s; }
+
+.radar-dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px; height: 10px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  box-shadow: 0 0 15px var(--accent-blue);
+}
+
+@keyframes radar-ping {
+  from { transform: scale(0.1); opacity: 0.8; }
+  to { transform: scale(1); opacity: 0; }
+}
+
+/* ---- Crash Simulation UI ---- */
+.iot-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+}
+
+.btn-crash {
+  background: var(--accent-red-dim);
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  padding: 18px;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-crash:hover {
+  background: var(--accent-red);
+  color: white;
+  box-shadow: 0 0 30px rgba(239,68,68,0.4);
+}
+
+.crash-alert-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(239,68,68,0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 20;
+  text-align: center;
+}
+
+.alert-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; animation: scale-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.alert-sub { font-size: 1.1rem; opacity: 0.9; margin-bottom: 32px; }
+
+.auto-sos-timer {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 900;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.cancel-sos-btn {
+  background: white;
+  color: var(--accent-red);
+  border: none;
+  padding: 12px 32px;
+  border-radius: 50px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+@keyframes scale-up { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .iot-grid { grid-template-columns: 1fr; }
+}

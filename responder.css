@@ -1,0 +1,877 @@
+/* ============================================================
+   SANJEEVANI SMART-SHIELD — Emergency Responder Page Styles
+   Optimized for: gloved hands, bright sunlight, 2G network
+   WCAG AA contrast compliant
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Rajdhani:wght@600;700&display=swap');
+
+:root {
+  --red:     #ef4444;
+  --amber:   #f59e0b;
+  --blue:    #3b82f6;
+  --green:   #22c55e;
+  --bg:      #0a0e1a;
+  --surface: rgba(255,255,255,0.04);
+  --text:    #f8fafc;
+  --muted:   #94a3b8;
+  --border:  rgba(255,255,255,0.08);
+}
+
+/* ---- Light Mode ----------------------------------------- */
+[data-theme="light"] {
+  --bg:      #f0f5fb;
+  --surface: rgba(255,255,255,0.85);
+  --text:    #0f172a;
+  --muted:   #64748b;
+  --border:  rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] body { background: var(--bg); }
+[data-theme="light"] .emergency-banner { background: #dc2626; }
+[data-theme="light"] .blood-type-card { background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.25); }
+[data-theme="light"] .resp-verified { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .ice-call-btn.primary { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); }
+[data-theme="light"] .hospital-locator-btn { background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05)); border-color: rgba(59,130,246,0.25); }
+
+/* ---- Responder Controls Bar ------------------------------ */
+.resp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 8px 20px;
+  background: rgba(0,0,0,0.15);
+  border-bottom: 1px solid var(--border);
+}
+
+.lang-picker {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  outline: none;
+  max-width: 140px;
+}
+
+.resp-theme-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.resp-theme-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* ---- Incident Map --------------------------------------- */
+#incident-map-section {
+  margin-bottom: 16px;
+}
+
+#incident-map {
+  height: 240px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-top: 10px;
+  margin-bottom: 8px;
+  z-index: 0;
+}
+
+.map-open-link {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--blue);
+  padding: 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Custom Leaflet marker pulse */
+.pulse-marker {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239,68,68,0.6);
+  animation: pulse-ring 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+  70%  { box-shadow: 0 0 0 18px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+/* Dark map tiles via CSS filter */
+[data-theme="dark"] .leaflet-tile { filter: brightness(0.75) saturate(0.8) invert(0.1); }
+[data-theme="light"] #incident-map { border-color: rgba(0,0,0,0.1); }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ---- Emergency header ------------------------------------- */
+.emergency-banner {
+  background: var(--red);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  animation: blink-banner 2s ease infinite;
+}
+
+.emergency-banner-text {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.emergency-banner-icon { font-size: 1.2rem; }
+
+@keyframes blink-banner {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.85; }
+}
+
+/* ---- Page container --------------------------------------- */
+.resp-container {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* ---- Loading state --------------------------------------- */
+#resp-loading {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--muted);
+}
+
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Error state ----------------------------------------- */
+#resp-error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 14px;
+  padding: 24px;
+  line-height: 1.6;
+  font-size: 0.9rem;
+  margin: 24px 0;
+  color: #fca5a5;
+}
+
+/* ---- Verified badge -------------------------------------- */
+.resp-verified {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  margin-bottom: 24px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.verified-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+/* ---- Blood type — dominant display ----------------------- */
+.blood-type-card {
+  text-align: center;
+  padding: 32px 24px;
+  background: rgba(239,68,68,0.06);
+  border: 2px solid rgba(239,68,68,0.3);
+  border-radius: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated pulse background */
+.blood-type-card::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 60%);
+  animation: pulse-bg 2s ease-in-out infinite;
+}
+
+@keyframes pulse-bg {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%       { transform: scale(1.1); opacity: 1; }
+}
+
+.blood-type-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--red);
+  margin-bottom: 12px;
+  position: relative;
+}
+
+#resp-blood-group {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--red);
+  position: relative;
+  display: block;
+  animation: heartbeat 1.4s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.05); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.04); }
+  70%       { transform: scale(1); }
+}
+
+.resp-name {
+  font-size: 0.95rem;
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: 12px;
+  position: relative;
+}
+
+.organ-donor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 5px 14px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---- Alert badges ---------------------------------------- */
+.alerts-section {
+  margin-bottom: 16px;
+}
+
+.alerts-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+#resp-allergies, #resp-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.alert-badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.alert-badge.allergy {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.4);
+  color: #fca5a5;
+}
+
+.alert-badge.condition {
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: #fcd34d;
+}
+
+/* ---- ICE Call buttons ------------------------------------- */
+.ice-section {
+  margin-bottom: 16px;
+}
+
+.ice-call-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-height: 72px; /* Large tap target for gloved hands */
+  text-decoration: none;
+  color: inherit;
+}
+
+.ice-call-btn.primary {
+  background: rgba(34,197,94,0.12);
+  border: 2px solid rgba(34,197,94,0.4);
+}
+
+.ice-call-btn.secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.ice-call-btn:active {
+  transform: scale(0.98);
+}
+
+.ice-call-btn.primary:hover { background: rgba(34,197,94,0.18); border-color: var(--green); }
+
+.ice-call-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.ice-call-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ice-call-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--green);
+}
+
+.ice-call-btn.secondary .ice-call-label { color: var(--muted); }
+
+.ice-call-name  { font-size: 1rem; font-weight: 700; }
+.ice-call-phone { font-size: 0.875rem; color: var(--muted); font-family: 'Rajdhani', sans-serif; }
+.ice-call-rel   { font-size: 0.75rem; color: var(--muted); }
+.ice-call-arrow { font-size: 1.2rem; color: var(--muted); flex-shrink: 0; }
+
+/* ---- Profile footer -------------------------------------- */
+.resp-footer {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.resp-footer-brand {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+#resp-updated {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ---- Auto-SOS Banner ------------------------------------- */
+#sos-banner {
+  margin-bottom: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.08);
+  animation: fadeInDown 0.5s ease both;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sos-banner-inner { padding: 16px; }
+
+.sos-banner-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sos-icon  { font-size: 1.4rem; flex-shrink: 0; }
+.sos-check { font-size: 1.4rem; flex-shrink: 0; margin-left: auto; }
+
+.sos-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 2px;
+}
+
+.sos-time {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.sos-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sos-contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.sos-contact-btn.whatsapp {
+  background: rgba(37, 211, 102, 0.12);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+}
+
+.sos-contact-btn.secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.sos-contact-btn:active { transform: scale(0.98); }
+
+.sos-contact-name   { font-weight: 700; color: var(--text); display: block; }
+.sos-contact-action { font-size: 0.7rem; color: var(--muted); display: block; }
+
+/* ---- Hospital Locator Button ----------------------------- */
+.hospital-locator-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.08));
+  border: 2px solid rgba(59, 130, 246, 0.35);
+  border-radius: 16px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+  transition: all 0.2s ease;
+  min-height: 72px;
+}
+
+.hospital-locator-btn:hover, .hospital-locator-btn:active {
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.14));
+  border-color: var(--blue);
+  transform: translateY(-1px);
+}
+
+.hospital-btn-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.hospital-btn-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hospital-btn-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.hospital-btn-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.hospital-btn-arrow {
+  font-size: 1.2rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* ---- Blood Bank Section ---------------------------------- */
+.blood-bank-section {
+  margin-bottom: 16px;
+}
+
+.bb-loading {
+  padding: 20px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.bb-patient-need {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.bb-need-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.bb-need-blood {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.bb-need-status {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 50px;
+  margin-left: auto;
+}
+
+.bb-need-status.available {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--green);
+}
+
+.bb-need-status.critical {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--red);
+  animation: blink-banner 1.5s ease infinite;
+}
+
+.bb-powered {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.bb-live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-dot 1.5s ease infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.bb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.bb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bb-item:last-child { border-bottom: none; }
+
+.bb-item-info { flex: 1; min-width: 0; }
+.bb-item-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+.bb-item-addr { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+.bb-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.bb-item-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 50px;
+}
+
+.bb-item-status.available {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.bb-item-status.out {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--red);
+}
+
+.bb-call-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--blue);
+  text-decoration: none;
+  padding: 3px 10px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50px;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.bb-eraktkosh-link {
+  display: block;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--blue);
+  padding: 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ================================================================
+   SOS TRIGGER SECTION
+   ================================================================ */
+
+.sos-trigger-section {
+  margin-bottom: 16px;
+}
+
+/* ---- Big SOS Button ----------------------------------------- */
+.sos-big-btn {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  cursor: pointer;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.45), 0 2px 8px rgba(0,0,0,0.3);
+  min-height: 80px;
+}
+
+.sos-big-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.6), 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.sos-big-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+}
+
+/* Pulsing ring behind button */
+.sos-big-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  animation: sos-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sos-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+  50%       { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+}
+
+.sos-big-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  position: relative;
+  animation: sos-shake 3s ease-in-out infinite;
+}
+
+@keyframes sos-shake {
+  0%, 90%, 100% { transform: rotate(0deg); }
+  92%            { transform: rotate(-8deg); }
+  94%            { transform: rotate(8deg); }
+  96%            { transform: rotate(-6deg); }
+  98%            { transform: rotate(0deg); }
+}
+
+.sos-big-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.sos-big-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sos-big-sub {
+  font-size: 0.72rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+/* ---- Sent Confirmation Bar ---------------------------------- */
+.sos-sent-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: 14px;
+  animation: fadeInDown 0.4s ease both;
+}
+
+.sos-sent-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+.sos-sent-title {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.sos-sent-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.sos-resend-btn {
+  margin-left: auto;
+  padding: 7px 16px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: 50px;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.sos-resend-btn:hover { background: rgba(34, 197, 94, 0.25); }
+
+/* ---- Per-contact SOS buttons -------------------------------- */
+.sos-contact-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sos-contact-wa-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  background: rgba(37, 211, 102, 0.08);
+  border: 1px solid rgba(37, 211, 102, 0.25);
+  transition: all 0.2s ease;
+}
+
+.sos-contact-wa-btn:hover {
+  background: rgba(37, 211, 102, 0.16);
+  border-color: rgba(37, 211, 102, 0.5);
+  transform: translateX(2px);
+}
+
+.sos-contact-wa-btn:active { transform: scale(0.98); }
+
+.sos-wa-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+.sos-wa-info { flex: 1; }
+.sos-wa-name { font-weight: 700; display: block; }
+.sos-wa-phone { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 1px; font-family: 'Rajdhani', sans-serif; }
+
+.sos-wa-arrow { font-size: 1rem; color: var(--muted); flex-shrink: 0; }
+
+/* Light mode overrides */
+[data-theme="light"] .sos-big-btn { box-shadow: 0 8px 32px rgba(220,38,38,0.3), 0 2px 8px rgba(0,0,0,0.1); }
+[data-theme="light"] .sos-sent-status { background: rgba(34,197,94,0.08); }
+

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sanjeevani Smart-Shield — Emergency Medical ID System. Register in 60 seconds and get a life-saving QR tag.">
+  <title>Sanjeevani Smart-Shield | Emergency Medical ID Platform</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/kiosk.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/iot.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡</text></svg>">
+
+  <!-- Theme pre-applied in theme.js to avoid FOUC -->
+  <script src="js/theme.js"></script>
+</head>
+<body>
+
+  <div id="firebase-error-banner" class="hidden">
+    ⚠ Supabase not configured. Edit <strong>js/firebase-config.js</strong> with your Project URL and anon key to enable cloud data sync.
+  </div>
+
+  <!-- ===================== NAVBAR ======================= -->
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-logo">
+      <span class="nav-logo-icon">🛡</span>
+      <span>Sanjeevani Smart-Shield</span>
+    </div>
+
+    <div class="nav-links">
+      <a class="nav-link" data-view="home"      href="#home"      id="nav-home">Home</a>
+      <a class="nav-link" data-view="kiosk"     href="#kiosk"     id="nav-kiosk">Register</a>
+      <a class="nav-link" data-view="dashboard" href="#dashboard" id="nav-dashboard">Dashboard</a>
+    </div>
+
+    <div class="nav-right">
+      <!-- Language Picker -->
+      <div id="lang-picker-nav" class="lang-picker-wrap"></div>
+
+      <!-- Theme Toggle -->
+      <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle theme">🌙</button>
+
+      <div class="nav-status">
+        <div class="nav-status-dot"></div>
+        <span>BOOTH ACTIVE</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HOME VIEW ==================== -->
+  <div id="view-home" class="view hidden">
+
+    <!-- Particle canvas -->
+    <canvas id="particle-canvas" aria-hidden="true"
+      style="position:absolute; top:64px; left:0; width:100%; height:calc(100vh - 64px); pointer-events:none; z-index:0;"></canvas>
+
+    <!-- Slide 1: Title & Mission -->
+    <section class="hero">
+      <div class="ecg-container" aria-hidden="true">
+        <svg class="ecg-svg" viewBox="0 0 1200 80" preserveAspectRatio="none">
+          <path id="ecg-path"
+            d="M0,40 L80,40 L100,40 L116,8 L132,72 L148,4 L164,76 L180,40 L200,40
+               L280,40 L296,8 L312,72 L328,4 L344,76 L360,40 L380,40
+               L460,40 L476,8 L492,72 L508,4 L524,76 L540,40 L560,40
+               L640,40 L656,8 L672,72 L688,4 L704,76 L720,40 L740,40
+               L820,40 L836,8 L852,72 L868,4 L884,76 L900,40 L920,40
+               L1000,40 L1016,8 L1032,72 L1048,4 L1064,76 L1080,40 L1200,40"/>
+        </svg>
+      </div>
+
+      <div class="hero-content" style="position:relative; z-index:1;">
+        <div class="hero-tag reveal">
+          <div class="hero-tag-dot"></div>
+          IDAA '26 AXIS INNOVATION
+        </div>
+
+        <h1 class="hero-title reveal reveal-delay-1">
+          You may be unconscious,<br>
+          <span class="hero-title-accent">but this Tag will speak!</span>
+        </h1>
+
+        <p class="hero-subtitle mission-statement reveal reveal-delay-2">
+          "Your Digital Voice in Emergencies — <strong>Sanjeevani Smart-Shield</strong>. A QR-code enabled wearable tag that connects you, the hospital, and your family in seconds. No app required."
+        </p>
+
+        <div class="hero-ctas reveal reveal-delay-3">
+          <button class="btn-primary" onclick="navigate('kiosk')" id="cta-register">
+            🛡 Build Your Profile
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2: The Problem -->
+    <section class="content-section alternate-bg">
+      <h2 class="section-title reveal">The <span class="gradient-text">"Golden Hour"</span> Gap</h2>
+      <p class="section-subtitle reveal">Every year in India, millions lose their lives in accidents because medical information is not available in time.</p>
+      
+      <div class="list-grid reveal reveal-delay-1">
+        <div class="list-card glass glass-hover">
+          <div class="list-icon">🔒</div>
+          <h3>Locked Devices</h3>
+          <p>Phones are inaccessible during emergencies, keeping identity and medical data locked away.</p>
+        </div>
+        <div class="list-card glass glass-hover">
+          <div class="list-icon">📴</div>
+          <h3>Communication Failure</h3>
+          <p>Paramedics cannot find family contact numbers, forcing them to work without essential context.</p>
+        </div>
+        <div class="list-card glass glass-hover">
+          <div class="list-icon">🩸</div>
+          <h3>Blood Group Risks</h3>
+          <p>Delays in identifying a patient's blood group create significant life risks during treatment.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: The Solution -->
+    <section class="content-section">
+      <h2 class="section-title reveal">Introducing <span class="gradient-text">Sanjeevani Smart-Shield</span></h2>
+      <div class="solution-grid reveal reveal-delay-1">
+        <div class="solution-item">
+          <span class="step-icon">🏷️</span>
+          <h4>Product</h4>
+          <p>A QR-code enabled wearable tag available as a Sticker, Keychain, or ID Card.</p>
+        </div>
+        <div class="solution-item">
+          <span class="step-icon">📱</span>
+          <h4>Accessibility</h4>
+          <p>No app required; it functions instantly via a standard smartphone camera scan.</p>
+        </div>
+        <div class="solution-item">
+          <span class="step-icon">⚡</span>
+          <h4>Connection in Seconds</h4>
+          <p>Eliminates the gap between the patient, hospital, and family immediately upon scanning.</p>
+        </div>
+        <div class="solution-item">
+          <span class="step-icon">🧑‍🤝‍🧑</span>
+          <h4>Zero Tech Barrier</h4>
+          <p>Any bystander or paramedic can scan with any smartphone.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: Key Features -->
+    <section class="features-row alternate-bg">
+      <h2 class="section-title reveal">The 4 Pillars of <span class="gradient-text">Smart-Shield</span></h2>
+      <div class="features-grid">
+        <div class="feature-card glass reveal reveal-delay-1">
+          <div class="feature-icon" style="background:rgba(239,68,68,0.15)">🩺</div>
+          <div class="feature-title">Digital Medical Profile</div>
+          <div class="feature-desc">Instant access to blood group, medical history, and drug allergies (Penicillin, Sulfa, NSAIDs) in one scan.</div>
+        </div>
+        <div class="feature-card glass reveal reveal-delay-2">
+          <div class="feature-icon" style="background:rgba(34,197,94,0.15)">📡</div>
+          <div class="feature-title">Auto-SOS Alert</div>
+          <div class="feature-desc">Automatically sends the family a Live GPS location via SMS/WhatsApp alert upon scanning.</div>
+        </div>
+        <div class="feature-card glass reveal reveal-delay-3">
+          <div class="feature-icon" style="background:rgba(59,130,246,0.15)">🏥</div>
+          <div class="feature-title">Smart Hospital Locator</div>
+          <div class="feature-desc">Provides a GPS-based list of the nearest Trauma Centers and ICUs, including Hallet and Regency.</div>
+        </div>
+        <div class="feature-card glass reveal" style="transition-delay:0.4s">
+          <div class="feature-icon" style="background:rgba(139,92,246,0.15)">🧪</div>
+          <div class="feature-title">Blood Bank Sync</div>
+          <div class="feature-desc">Connected to the e-RaktKosh API for real-time blood availability checks for life-saving transfusions.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: How It Works -->
+    <section class="how-it-works">
+      <h2 class="section-title reveal">From Scan to Safety in <span class="gradient-text">4 Steps</span></h2>
+      <p class="section-subtitle reveal" style="margin-top: -30px;">The entire process is completed in under 60 seconds.</p>
+      <div class="steps-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="step-card glass glass-hover reveal reveal-delay-1">
+          <div class="step-number">1</div>
+          <span class="step-icon">📝</span>
+          <div class="step-title">Registration</div>
+          <p class="step-desc">Input medical and contact details into the Sanjeevani database.</p>
+        </div>
+        <div class="step-card glass glass-hover reveal reveal-delay-2">
+          <div class="step-number">2</div>
+          <span class="step-icon">🛡</span>
+          <div class="step-title">Apply QR</div>
+          <p class="step-desc">Attach the Smart-Shield tag to a helmet, bike, or person.</p>
+        </div>
+        <div class="step-card glass glass-hover reveal reveal-delay-3">
+          <div class="step-number">3</div>
+          <span class="step-icon">🔍</span>
+          <div class="step-title">Scan</div>
+          <p class="step-desc">Bystander or paramedic scans the tag with any smartphone.</p>
+        </div>
+        <div class="step-card glass glass-hover reveal" style="transition-delay:0.4s">
+          <div class="step-number">4</div>
+          <span class="step-icon">🚑</span>
+          <div class="step-title">Immediate Action</div>
+          <p class="step-desc">Alerts are sent and the full medical profile is revealed.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: Healthcare Precision -->
+    <section class="content-section alternate-bg">
+      <h2 class="section-title reveal" style="margin-bottom: 50px;">Healthcare & Pharmaceutical Precision:<br><span class="gradient-text">Accuracy Saves Lives</span></h2>
+      <div class="list-grid reveal reveal-delay-1">
+        <div class="list-card glass glass-hover">
+          <div class="list-icon">💊</div>
+          <h3>Drug Allergy Alerts</h3>
+          <p>Provides critical information on sensitivities like Penicillin or Sulfa to prevent Anaphylaxis.</p>
+        </div>
+        <div class="list-card glass glass-hover">
+          <div class="list-icon">❤️</div>
+          <h3>Condition Tracking</h3>
+          <p>Immediate identification of Diabetes or Heart conditions allows doctors to determine the correct dosage.</p>
+        </div>
+        <div class="list-card glass glass-hover">
+          <div class="list-icon">🩸</div>
+          <h3>Blood Management</h3>
+          <p>Inventory accuracy for urgent transfusions synced with Kanpur blood banks.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7 & 8: Business Strategy -->
+    <section class="content-section split-section">
+      <div class="split-col glass glass-hover reveal reveal-delay-1">
+        <h2 class="section-title" style="text-align:left; font-size:1.8rem; margin-bottom: 24px;">Revenue Model:<br><span class="gradient-text">Built to Scale</span></h2>
+        <ul class="styled-list">
+          <li><strong>Production Cost:</strong> ₹10–15 per unit (Sticker, Keychain, ID Card).</li>
+          <li><strong>Profitability:</strong> High-margin model with a ~900% profit margin.</li>
+          <li><strong>Pricing:</strong> Affordable ₹99 special IDAA price for students and daily commuters.</li>
+          <li><strong>Recurring Revenue:</strong> ₹99/year subscription for SOS cloud maintenance.</li>
+          <li><strong>Initial Market:</strong> Targeting 5,000+ Axis College students & Kanpur commuters.</li>
+        </ul>
+      </div>
+      <div class="split-col glass glass-hover reveal reveal-delay-2">
+        <h2 class="section-title" style="text-align:left; font-size:1.8rem; margin-bottom: 24px;">Go-to-Market<br><span class="gradient-text">Strategy</span></h2>
+        <ul class="styled-list">
+          <li><strong>Live Demo Station:</strong> "Scan to Save" experience at the booth showing judges and visitors real-time demos.</li>
+          <li><strong>Viral Growth:</strong> "Buy for yourself, get 50% off for your family" word-of-mouth strategy.</li>
+          <li><strong>Professional Branding:</strong> Team in lab coats with a live map display of active tags across Kanpur.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Slide 9: Feasibility & Safety -->
+    <section class="content-section alternate-bg">
+      <h2 class="section-title reveal">Feasibility & Safety: <span class="gradient-text">Built for the Future</span></h2>
+      <div class="solution-grid reveal reveal-delay-1">
+        <div class="solution-item">
+          <span class="step-icon">🔒</span>
+          <h4>Data Security</h4>
+          <p>Fully encrypted user data accessible only through the emergency scan.</p>
+        </div>
+        <div class="solution-item">
+          <span class="step-icon">🌧️</span>
+          <h4>Durability</h4>
+          <p>Waterproof and heat-resistant tags built for the extreme heat and rain of Kanpur.</p>
+        </div>
+        <div class="solution-item" style="grid-column: span 2;">
+          <span class="step-icon">🗺️</span>
+          <h4>Roadmap</h4>
+          <div style="text-align: left; padding: 0 40px; margin-top: 10px;">
+            <p style="margin-bottom: 8px;"><strong>Phase 1:</strong> Campus Launch at Axis Colleges.</p>
+            <p style="margin-bottom: 8px;"><strong>Phase 2:</strong> Partnerships with petrol pumps, RTOs, and hospitals (Hallet/Regency).</p>
+            <p><strong>Phase 3:</strong> State expansion with e-RaktKosh integration.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10: Conclusion -->
+    <section class="content-section" style="text-align: center; padding-bottom: 120px; padding-top:120px;">
+      <h2 class="section-title reveal" style="font-size: 3rem;"><span class="gradient-text">Saving Time to Save Lives</span></h2>
+      <p class="section-subtitle reveal reveal-delay-1" style="max-width: 800px; margin: 0 auto; font-size:1.4rem;">
+        "We are not just selling technology; we are selling Time."<br><br>
+        <span style="font-size:1.1rem; color:var(--text-muted);">Every second matters. Smart-Shield returns the seconds that define the difference between life and death.</span>
+      </p>
+      
+      <div class="hero-ctas reveal reveal-delay-2" style="justify-content: center; margin-top: 50px;">
+        <button class="btn-primary" style="font-size: 1.15rem; padding: 18px 40px;" onclick="navigate('kiosk')">
+          Visit Our Booth for a Live Life-Saving Demo!
+        </button>
+      </div>
+      
+      <div class="reveal reveal-delay-3" style="margin-top: 80px; color: var(--text-muted); font-size:1.1rem;">
+        <p>Partnership: Hospitals, NGOs, and Investors—let's change things together.</p>
+        <p style="font-weight: 700; margin-top: 12px; font-size: 1.25rem;">Thank You! IDAA '26.</p>
+      </div>
+    </section>
+
+  </div><!-- /view-home -->
+
+
+  <!-- ===================== KIOSK VIEW ==================== -->
+  <div id="view-kiosk" class="view hidden">
+    <div class="kiosk-container">
+
+      <div class="kiosk-header">
+        <div>
+          <h1 class="kiosk-title">🛡 Patient Registration Kiosk</h1>
+          <p class="kiosk-subtitle">Onboard a customer and generate their Shield ID in under 60 seconds.</p>
+        </div>
+        <div class="kiosk-header-right">
+          <div class="kiosk-controls">
+            <button class="btn-icon-sm" id="btn-toggle-config" title="Deployment URL Settings">⚙️ URL Config</button>
+            <div class="stopwatch-display" id="kiosk-stopwatch">⏱ 00:00</div>
+          </div>
+          <div class="live-sales-badge">
+            🟢 Sales Today: <span id="live-sales-count" data-count="0">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- URL Configuration Panel (Hidden by default) -->
+      <div id="url-config-panel" class="glass url-config-panel hidden">
+        <div class="url-config-header">
+          <span>🌐 Deployment URL Settings</span>
+          <button class="btn-close-sm" onclick="toggleUrlConfig()">×</button>
+        </div>
+        <p class="url-config-desc">Enter your Local IP or Public URL (e.g. <code>http://192.168.1.5:5500</code>) to make QR codes scannable on phones during the demo.</p>
+        <div class="url-config-input-wrap">
+          <input type="text" id="config-base-url" placeholder="https://your-demo-url.com" oninput="saveUrlConfig(this.value)">
+          <button class="btn-primary-sm" onclick="toggleUrlConfig()">Done</button>
+        </div>
+        <div id="url-config-status" class="url-config-status">Current: Using local file path (not scannable)</div>
+      </div>
+
+      <!-- Step progress -->
+      <div class="step-progress" aria-label="Registration progress">
+        <div class="step-dot" aria-label="Step 1: Personal Info"></div>
+        <div class="step-connector"></div>
+        <div class="step-dot" aria-label="Step 2: Medical Conditions"></div>
+        <div class="step-connector"></div>
+        <div class="step-dot" aria-label="Step 3: Emergency Contacts"></div>
+        <div class="step-connector"></div>
+        <div class="step-dot" aria-label="Step 4: Package"></div>
+      </div>
+      <p class="step-label" id="step-label">Step 1 of 4: Personal Info</p>
+
+      <!-- Kiosk split layout: Form + Live Preview -->
+      <div class="kiosk-split" id="kiosk-form-area">
+
+        <!-- Left: Form -->
+        <div class="kiosk-form-col">
+          <div class="glass kiosk-card">
+            <div id="step-content"></div>
+          </div>
+        </div>
+
+        <!-- Right: Live Preview -->
+        <div class="kiosk-preview-col">
+          <div class="preview-panel glass">
+            <div class="preview-panel-title">
+              <span>📋 Live Emergency Card Preview</span>
+              <span class="preview-live-dot"></span>
+            </div>
+            <div class="live-preview-card" id="live-preview-card">
+              <div class="preview-emergency-label">🚨 EMERGENCY MEDICAL ID</div>
+              <div class="preview-blood">?</div>
+              <div class="preview-name">Fill the form to preview</div>
+              <div class="preview-ice placeholder">Emergency contacts will appear here</div>
+              <div class="preview-shield-tag">Live preview of your Emergency Card</div>
+            </div>
+            <div class="preview-tip">
+              This is exactly what first responders will see when they scan the QR tag.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /kiosk-split -->
+
+      <!-- Result screen -->
+      <div id="kiosk-result" class="hidden">
+        <div class="glass kiosk-card result-card">
+          <div class="result-success-header">
+            <span class="result-icon">✅</span>
+            <h2 class="result-title">Shield Registered Successfully!</h2>
+            <p class="result-sub">Profile saved permanently to the Sanjeevani database.</p>
+            <span id="result-time" class="result-time-badge"></span>
+          </div>
+
+          <div class="result-grid">
+            <div class="result-qr-col">
+              <div id="result-qr"></div>
+            </div>
+            <div class="result-info-col">
+              <div class="result-field">
+                <span class="result-field-label">Shield ID</span>
+                <span class="result-shield-id" id="result-shield-id">—</span>
+              </div>
+              <div class="result-field">
+                <span class="result-field-label">Patient Name</span>
+                <span class="result-field-value" id="result-name">—</span>
+              </div>
+              <div class="result-field">
+                <span class="result-field-label">Blood Group</span>
+                <span class="result-field-value result-blood" id="result-blood">—</span>
+              </div>
+              <div class="result-field">
+                <span class="result-field-label">Package</span>
+                <span class="result-field-value" id="result-package">—</span>
+              </div>
+              <div id="result-preview"></div>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn-icon" id="btn-print-tag">🖨 Print Tag</button>
+            <button class="btn-icon btn-success" id="btn-whatsapp-share">📲 Share via WhatsApp</button>
+            <button class="btn-primary" id="btn-new-reg">→ Register Another</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /view-kiosk -->
+
+
+  <!-- ===================== DASHBOARD VIEW ================ -->
+  <div id="view-dashboard" class="view hidden">
+    <div class="dashboard-container">
+
+      <header class="dash-header">
+        <div class="dash-title-wrap">
+          <h1 class="dash-title" data-i18n="dash_title">Live Analytics Dashboard</h1>
+          <p class="dash-sub" data-i18n="dash_sub">Real-time data powered by Supabase PostgreSQL</p>
+        </div>
+        <div class="dash-status">
+          <div class="status-indicator"></div>
+          <span class="status-text" data-i18n="dash_status_live">LIVE • SUPABASE</span>
+        </div>
+      </header>
+
+      <div id="dashboard-loader" class="hidden">
+        <div class="skeleton-metrics-grid">
+          <div class="skeleton skeleton-block"></div>
+          <div class="skeleton skeleton-block"></div>
+          <div class="skeleton skeleton-block"></div>
+          <div class="skeleton skeleton-block"></div>
+        </div>
+      </div>
+      <div id="dashboard-error" class="hidden"></div>
+
+      <div class="metrics-grid">
+        <div class="metric-card glass">
+          <div class="metric-icon">🧑</div>
+          <div class="metric-label">Total Registrations</div>
+          <div class="metric-value" id="dash-total">—</div>
+          <div class="metric-sub">All-time customers</div>
+        </div>
+        <div class="metric-card glass">
+          <div class="metric-icon">💰</div>
+          <div class="metric-label">Total Revenue</div>
+          <div class="metric-value green" id="dash-revenue">—</div>
+          <div class="metric-sub">All packages sold</div>
+        </div>
+        <div class="metric-card glass">
+          <div class="metric-icon">🏆</div>
+          <div class="metric-label">Best-Selling SKU</div>
+          <div class="metric-value blue" id="dash-sku" style="font-size:1rem; padding-top:10px;">—</div>
+          <div class="metric-sub">Most popular package</div>
+        </div>
+        <div class="metric-card glass">
+          <div class="metric-icon">📅</div>
+          <div class="metric-label">Registered Today</div>
+          <div class="metric-value amber" id="dash-today">—</div>
+          <div class="metric-sub">Today's customers</div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-panel glass">
+          <div class="chart-title">📦 Sales by Package</div>
+          <div id="sku-chart"></div>
+        </div>
+        <div class="chart-panel glass">
+          <div class="chart-title">🩸 Blood Group Distribution</div>
+          <div id="bg-chart"></div>
+        </div>
+      </div>
+
+      <div class="log-panel glass">
+        <div class="log-panel-header">
+          <div class="chart-title" style="margin-bottom:0">📋 Registration Log</div>
+          <span style="font-size:0.78rem; color:var(--text-muted)">Latest 30 records</span>
+        </div>
+        <div id="reg-log"></div>
+      </div>
+
+      <!-- ================= IoT COMMAND CENTER ================= -->
+      <section class="iot-panel glass reveal">
+        <div class="iot-header">
+          <div class="iot-title-wrap">
+            <span style="font-size:1.8rem;">📡</span>
+            <div>
+              <h2 style="margin:0; font-size:1.3rem;">Smart-Shield IoT Command Center</h2>
+              <p style="margin:0; font-size:0.8rem; color:var(--text-muted);">Simulated Smart-Helmet & Vehicle Sensor Hub</p>
+            </div>
+          </div>
+          <div id="iot-status" class="iot-status-chip">CONNECTED • ACTIVE</div>
+        </div>
+
+        <div class="iot-grid">
+          <div class="sensor-card">
+            <span class="sensor-label">High-G Accelerometer</span>
+            <div class="gauge-container">
+              <div class="gauge-value" id="iot-gforce">1.02</div>
+              <div class="gauge-unit">G-FORCE</div>
+            </div>
+          </div>
+
+          <div class="sensor-card">
+            <span class="sensor-label">Tilt / Orientation</span>
+            <div class="tilt-vis">
+              <div class="tilt-line" id="iot-tilt-line"></div>
+            </div>
+            <div class="tilt-angle" id="iot-tilt-angle">0°</div>
+          </div>
+
+          <div class="iot-actions">
+            <button class="btn-crash" onclick="simulateCrash()">💥 Simulate High-Impact Crash</button>
+            <p style="font-size:0.75rem; color:var(--text-muted); text-align:center;">
+              Triggers automatic emergency sequence on detection
+            </p>
+          </div>
+        </div>
+
+        <!-- Crash Alert Overlay (Hidden) -->
+        <div id="crash-overlay" class="crash-alert-overlay hidden">
+          <div class="alert-title">🚨 CRASH DETECTED</div>
+          <p class="alert-sub">Sanjeevani Smart-Shield IoT sensor detected a severe impact.</p>
+          
+          <div style="font-size:0.8rem; letter-spacing:0.1em; margin-bottom:10px;">AUTO-SOS BROADCAST IN</div>
+          <div class="auto-sos-timer">
+            <span id="sos-countdown">5</span>
+          </div>
+          
+          <button class="cancel-sos-btn" onclick="cancelIoTSOS()">CANCEL SOS (I'M OKAY)</button>
+        </div>
+      </section>
+
+    </div>
+  </div><!-- /view-dashboard -->
+
+
+  <!-- ===================== SCRIPTS ======================= -->
+  <!-- Supabase JS SDK (replaces Firebase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/qr-engine.js"></script>
+  <script src="js/kiosk.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/iot-engine.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

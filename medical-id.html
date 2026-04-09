@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sanjeevani Smart-Shield Emergency Medical ID — for first responders.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>🚨 Emergency Medical ID | Sanjeevani Smart-Shield</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Leaflet map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+
+  <link rel="stylesheet" href="css/responder.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚨</text></svg>">
+
+  <script src="js/theme.js"></script>
+</head>
+<body>
+
+  <!-- Emergency header -->
+  <div class="emergency-banner" role="alert" aria-live="assertive">
+    <span class="emergency-banner-icon">🚨</span>
+    <span class="emergency-banner-text" data-i18n="emergency_banner">Medical Emergency — Scan Verified</span>
+    <span class="emergency-banner-icon">🚨</span>
+  </div>
+
+  <!-- Top controls bar (language + theme) -->
+  <div class="resp-controls">
+    <div id="lang-picker-resp" class="lang-picker-wrap"></div>
+    <button class="theme-toggle-btn resp-theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+
+  <main class="resp-container">
+
+    <!-- SOS banner -->
+    <div id="sos-banner" class="hidden"></div>
+
+    <!-- Loading -->
+    <div id="resp-loading">
+      <div class="loading-spinner"></div>
+      <span data-i18n="loading">Retrieving medical profile...</span>
+    </div>
+
+    <!-- Error -->
+    <div id="resp-error" class="hidden" role="alert"></div>
+
+    <!-- Main card -->
+    <div id="resp-card" class="hidden">
+
+      <!-- Verified badge -->
+      <div class="resp-verified">
+        <span id="shield-id-display" style="font-family:'Rajdhani',sans-serif; letter-spacing:0.06em;"></span>
+        <span class="verified-check" data-i18n="verified">✅ Sanjeevani Verified</span>
+      </div>
+
+      <!-- Blood Type -->
+      <div class="blood-type-card" aria-label="Blood type">
+        <div class="blood-type-label" data-i18n="blood_type_label">🩸 Blood Type</div>
+        <span id="resp-blood-group">—</span>
+        <p class="resp-name" id="resp-name"></p>
+        <div class="organ-donor-badge hidden" id="resp-organ-donor" data-i18n="organ_donor">
+          💚 Registered Organ Donor
+        </div>
+      </div>
+
+      <!-- ===== SOS BUTTON ===================================== -->
+      <div class="sos-trigger-section" id="sos-trigger-section">
+
+        <!-- Big SOS Button -->
+        <button class="sos-big-btn" id="sos-big-btn" onclick="triggerManualSOS()">
+          <span class="sos-big-pulse"></span>
+          <span class="sos-big-icon">🆘</span>
+          <div class="sos-big-text">
+            <span class="sos-big-title">SEND EMERGENCY SOS</span>
+            <span class="sos-big-sub">WhatsApp alert → all registered family contacts</span>
+          </div>
+        </button>
+
+        <!-- SOS Sent Confirmation (hidden until triggered) -->
+        <div class="sos-sent-status hidden" id="sos-sent-status">
+          <span class="sos-sent-icon">✅</span>
+          <div>
+            <div class="sos-sent-title">SOS Dispatched</div>
+            <div class="sos-sent-sub" id="sos-sent-time"></div>
+          </div>
+          <button class="sos-resend-btn" onclick="triggerManualSOS(true)">Resend</button>
+        </div>
+
+        <!-- Contact buttons populated by JS -->
+        <div class="sos-contact-list" id="sos-contact-list"></div>
+
+      </div>
+      <!-- ===== /SOS BUTTON ==================================== -->
+
+      <!-- Hospital Locator -->
+      <button class="hospital-locator-btn" id="find-hospital-btn" onclick="openHospitalLocator()">
+        <span class="hospital-btn-icon">🏥</span>
+        <div class="hospital-btn-text">
+          <span class="hospital-btn-title" data-i18n="hospital_title">Find Nearest Emergency Hospital</span>
+          <span class="hospital-btn-sub" data-i18n="hospital_sub">Trauma Centers · ICU · Blood Banks · powered by Google Maps</span>
+        </div>
+        <span class="hospital-btn-arrow">→</span>
+      </button>
+
+      <!-- Incident Map -->
+      <div id="incident-map-section" class="hidden">
+        <div class="alerts-section-label" data-i18n="map_title">📍 Incident Location</div>
+        <div id="incident-map"></div>
+        <a id="open-in-maps" class="map-open-link" href="#" target="_blank" data-i18n="map_open">Open in Google Maps →</a>
+      </div>
+
+      <!-- Allergy Alerts -->
+      <div class="alerts-section hidden" id="allergy-section">
+        <div class="alerts-section-label" data-i18n="allergy_title">⚠ Critical Allergies — Do NOT administer</div>
+        <div id="resp-allergies"></div>
+      </div>
+
+      <!-- Conditions -->
+      <div class="alerts-section hidden" id="condition-section">
+        <div class="alerts-section-label" data-i18n="condition_title">🏥 Known Medical Conditions</div>
+        <div id="resp-conditions"></div>
+      </div>
+
+      <!-- ICE Contacts -->
+      <div class="ice-section">
+        <div class="alerts-section-label" data-i18n="ice_title">📞 Emergency Contacts — Tap to Call</div>
+        <div id="resp-ice-contacts"></div>
+      </div>
+
+      <!-- Blood Bank -->
+      <div id="blood-bank-section" class="blood-bank-section hidden">
+        <div class="alerts-section-label" data-i18n="blood_bank_title">🩸 Blood Bank Availability</div>
+        <div id="blood-bank-content"></div>
+      </div>
+
+      <!-- Footer -->
+      <div class="resp-footer">
+        <div class="resp-footer-brand">🛡 Sanjeevani Smart-Shield</div>
+        <div id="resp-updated"></div>
+      </div>
+
+    </div><!-- /resp-card -->
+  </main>
+
+  <!-- Supabase JS SDK (replaces Firebase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/medical-id.js"></script>
+
+</body>
+</html>
