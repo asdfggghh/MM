@@ -98,26 +98,30 @@ async function saveProfile(data) {
   const pkg = (typeof PACKAGES !== "undefined" ? PACKAGES : [])
     .find(p => p.id === data.package_id);
 
+  // Helper to ensure we get a clean number even if symbols like ₹ are present
+  const _cleanNum = (val) => {
+    if (typeof val === "number") return val;
+    const n = Number(String(val || 0).replace(/[^\d.-]/g, ''));
+    return isNaN(n) ? 0 : n;
+  };
+
   const profile = {
     shield_id:     generateShieldId(data.name),
-    name:          data.name.trim(),
-    age:           Number(data.age),
+    name:          String(data.name || "").trim(),
+    age:           _cleanNum(data.age),
     gender:        data.gender || "",
     blood_group:   data.blood_group,
     allergies:     (data.allergies  || []).filter(a => a && a !== "None"),
     conditions:    (data.conditions || []).filter(c => c && c !== "None"),
     organ_donor:   Boolean(data.organ_donor),
     ice_contacts:  (data.ice_contacts || []).filter(c => c.name || c.phone),
-    package_name:  data.package_name || pkg?.name || "",
-    price:         Number(data.price || pkg?.price || 0),
+    package_name:  data.package_name || pkg?.name || "Standard Package",
+    price:         _cleanNum(data.price || pkg?.price || 0),
     registered_at: new Date().toISOString(),
     updated_at:    new Date().toISOString(),
   };
 
   // Always cache locally first (instant UI)
-  _cacheUpsert(profile);
-
-  // Always cache locally first (instant UI update)
   _cacheUpsert(profile);
 
   if (supabaseClient) {
