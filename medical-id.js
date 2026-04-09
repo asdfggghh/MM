@@ -33,6 +33,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const params   = new URLSearchParams(window.location.search);
   const shieldId = params.get("id");
   const encoded  = params.get("d");
+  const urlLang  = params.get("lang");
+
+  // Multi-language: Build picker and handle URL override
+  if (typeof buildLanguagePicker === "function") {
+    buildLanguagePicker("lang-picker-resp");
+  }
+  if (urlLang && typeof setLanguage === "function") {
+    setLanguage(urlLang);
+  }
 
   if (!shieldId) {
     showError("No Shield ID found in this QR code. The tag may be damaged or invalid.");
@@ -40,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   document.getElementById("shield-id-display").textContent = shieldId;
-
+  
   // SPEED OPTIMIZATION: If we have direct data in the URL (?d=), show it INSTANTLY (0ms)
   // This solves the "2 minute loading" problem by not waiting for the network.
   if (encoded && typeof decodeProfile === "function") {
@@ -505,3 +514,88 @@ function showError(msg) {
   const el = document.getElementById("resp-error");
   if (el) { el.innerHTML = msg; el.classList.remove("hidden"); }
 }
+
+// ============================================================
+//  DIGITAL VOICE (TTS — Text to Speech)
+// ============================================================
+
+let speechSnyth = window.speechSynthesis;
+let isSpeaking = false;
+
+function toggleVoice() {
+  if (isSpeaking) {
+    stopVoice();
+  } else {
+    speakProfile();
+  }
+}
+
+function stopVoice() {
+  speechSnyth.cancel();
+  isSpeaking = false;
+  const btn = document.getElementById("voice-btn");
+  if (btn) {
+    btn.textContent = t("speak_profile");
+    btn.classList.remove("speaking");
+  }
+}
+
+function speakProfile() {
+  if (!currentProfile) return;
+  
+  stopVoice(); // Clear queue
+
+  const text = buildSpeechText(currentProfile);
+  const utterance = new SpeechSynthesisUtterance(text);
+  
+  // Attempt to find a voice matching the current language
+  const voices = speechSnyth.getVoices();
+  const targetLang = currentLang || "en";
+  utterance.lang = targetLang;
+  
+  const voice = voices.find(v => v.lang.startsWith(targetLang));
+  if (voice) utterance.voice = voice;
+
+  utterance.onstart = () => {
+    isSpeaking = true;
+    const btn = document.getElementById("voice-btn");
+    if (btn) {
+      btn.textContent = t("stop_speech");
+      btn.classList.add("speaking");
+    }
+  };
+
+  utterance.onend = () => {
+    isSpeaking = false;
+    const btn = document.getElementById("voice-btn");
+    if (btn) {
+      btn.textContent = t("speak_profile");
+      btn.classList.remove("speaking");
+    }
+  };
+
+  speechSnyth.speak(utterance);
+}
+
+function buildSpeechText(p) {
+  let s = `${t("speech_intro")} ${p.name}. `;
+  s += `${t("speech_blood")} ${p.blood_group}. `;
+  
+  if (p.allergies && p.allergies.length > 0) {
+    s += `${t("speech_allergic")} ${p.allergies.join(", ")}. `;
+  }
+  
+  if (p.conditions && p.conditions.length > 0) {
+    s += `${t("speech_conditions")} ${p.conditions.join(", ")}. `;
+  }
+  
+  if (p.organ_donor) {
+    s += t("speech_donor");
+  }
+
+  return s;
+}
+
+// Pre-load voices (chrome fix)
+window.speechSynthesis.getVoices();
+
