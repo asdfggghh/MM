@@ -26,7 +26,8 @@ function buildMedicalIdUrl(profileOrId) {
   }
 
   const shieldId = typeof profileOrId === "string" ? profileOrId : profileOrId.shield_id;
-  let url = `${base}/medical-id.html?id=${encodeURIComponent(shieldId)}`;
+  const lang = typeof currentLang !== "undefined" ? currentLang : "en";
+  let url = `${base}/medical-id.html?id=${encodeURIComponent(shieldId)}&lang=${lang}`;
 
   // HYBRID MODE: If we have the full profile object, encode it directly into the URL (?d=)
   // This allows the page to load INSTANTLY (0ms) while waiting for Supabase in the background.
